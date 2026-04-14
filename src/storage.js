@@ -15,6 +15,18 @@ const BUCKET = process.env.MINIO_BUCKET || 'diary';
 async function ensureBucket() {
   const exists = await client.bucketExists(BUCKET);
   if (!exists) await client.makeBucket(BUCKET);
+
+  // Make bucket publicly readable so photo URLs work without auth
+  const policy = JSON.stringify({
+    Version: '2012-10-17',
+    Statement: [{
+      Effect: 'Allow',
+      Principal: { AWS: ['*'] },
+      Action: ['s3:GetObject'],
+      Resource: [`arn:aws:s3:::${BUCKET}/*`],
+    }],
+  });
+  await client.setBucketPolicy(BUCKET, policy);
 }
 
 async function uploadFile(buffer, mimetype, originalname) {
