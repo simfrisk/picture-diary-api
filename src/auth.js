@@ -1,17 +1,14 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const router = express.Router();
-
-const PASSWORD_HASH = process.env.DIARY_PASSWORD_HASH;
 
 router.post('/login', async (req, res) => {
   const { password } = req.body;
   if (!password) return res.status(400).json({ error: 'Password required' });
 
-  const valid = await bcrypt.compare(password, PASSWORD_HASH);
+  const valid = password === process.env.DIARY_PASSWORD;
   if (!valid) return res.status(401).json({ error: 'Invalid password' });
 
   const token = jwt.sign({ sub: 'simon' }, process.env.JWT_SECRET, { expiresIn: '90d' });
